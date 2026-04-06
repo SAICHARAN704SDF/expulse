@@ -5,8 +5,11 @@ backend/.env
 node_modules/
 frontend/node_modules/
 frontend/build/
-frontend/android/
-android/
+frontend/android/local.properties
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/.idea/
 
 # Runtime artifacts
 .DS_Store
