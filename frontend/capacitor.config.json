@@ -1,0 +1,6 @@
+{
+  "appId": "com.vitallens.app",
+  "appName": "VitalLens",
+  "webDir": "build",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,22 @@
+backend/.env
+.env
+
+# Node / Capacitor
+node_modules/
+frontend/node_modules/
+frontend/build/
+frontend/android/
+android/
+
+# Runtime artifacts
+.DS_Store
+*.log
+*.db
+logs/
+
+# Editor state
+.vscode/
+
+# Python
+__pycache__/
+.venv/
