@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Chatbot from './components/Chatbot';
+import ApiConfigGate from './components/ApiConfigGate';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -109,9 +110,11 @@ const AppLayout = () => {
 };
 
 const App = () => (
-  <AuthProvider>
-    <AppLayout />
-  </AuthProvider>
+  <ApiConfigGate>
+    <AuthProvider>
+      <AppLayout />
+    </AuthProvider>
+  </ApiConfigGate>
 );
 
 export default App;

@@ -1,9 +1,25 @@
 import axios from 'axios';
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
+export const API_URL_STORAGE_KEY = 'expluse_api_url';
+
+export const normalizeApiBaseUrl = (value) => {
+  const trimmedValue = (value || '').trim().replace(/\/+$/, '');
+
+  if (!trimmedValue) {
+    return '';
+  }
+
+  return trimmedValue.endsWith('/api') ? trimmedValue : `${trimmedValue}/api`;
+};
+
+export const getApiBaseUrl = () => {
+  const savedUrl = normalizeApiBaseUrl(localStorage.getItem(API_URL_STORAGE_KEY));
+  const envUrl = normalizeApiBaseUrl(process.env.REACT_APP_API_URL);
+
+  return savedUrl || envUrl || 'http://127.0.0.1:8000/api';
+};
 
 const api = axios.create({
-  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,6 +28,8 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
+
     const token = localStorage.getItem('token');
 
     if (token) {
