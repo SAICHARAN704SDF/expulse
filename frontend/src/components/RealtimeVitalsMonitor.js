@@ -64,7 +64,6 @@ const RealtimeVitalsMonitor = () => {
   const [error, setError] = useState('');
   const [vitals, setVitals] = useState(initialVitals);
   const [faceAlert, setFaceAlert] = useState('');
-  const [fitAlert, setFitAlert] = useState('');
   const [waveform, setWaveform] = useState([]);
   const [respWaveform, setRespWaveform] = useState([]);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -238,7 +237,6 @@ const RealtimeVitalsMonitor = () => {
       }
 
       if (response.data.face_in_frame === false) {
-        setFitAlert('Align your face fully inside the blue frame');
         setVitals((previous) => ({
           ...previous,
           bpm: 0,
@@ -249,15 +247,12 @@ const RealtimeVitalsMonitor = () => {
           signal_quality: 0,
           roi_regions: {},
         }));
-      } else {
-        setFitAlert('');
       }
     } catch (requestError) {
       const detail = requestError.response?.data?.detail;
       const message = Array.isArray(detail) ? detail[0]?.msg : detail;
       setError(message || 'Unable to process your scan. Please try again.');
       setFaceAlert('');
-      setFitAlert('');
       setVitals((previous) => ({
         ...previous,
         bpm: 0,
@@ -287,7 +282,6 @@ const RealtimeVitalsMonitor = () => {
     phaseRef.current = 0;
     requestInFlightRef.current = false;
     setFaceAlert('');
-    setFitAlert('');
 
     try {
       await api.post('/predict', {
@@ -349,12 +343,10 @@ const RealtimeVitalsMonitor = () => {
     frameBufferRef.current = [];
     setError('');
     setFaceAlert('');
-    setFitAlert('');
     requestInFlightRef.current = false;
   };
 
   const scanSeconds = Math.floor(elapsedMs / 1000);
-  const roiEntries = Object.entries(vitals.roi_regions || {});
   const hasLiveReadings = (vitals.bpm || 0) > 0 && (vitals.respiratory_rate || 0) > 0;
 
   return (
@@ -381,12 +373,6 @@ const RealtimeVitalsMonitor = () => {
             </Box>
           )}
 
-          {scanState === 'scanning' && vitals.face_detected && vitals.face_in_frame === false && (
-            <Box className="inline-fit-warning">
-              <Typography className="inline-fit-warning-text">Align Face In Blue Frame</Typography>
-            </Box>
-          )}
-
           <Box className="face-frame-layer">
             <Webcam
               audio={false}
@@ -405,34 +391,6 @@ const RealtimeVitalsMonitor = () => {
             <Box className={`scan-oval ${scanState === 'scanning' ? 'scan-oval-active' : ''}`}>
               {scanState === 'scanning' && !hasLiveReadings && <Box className="scan-sweep-line" />}
             </Box>
-
-            {roiEntries.map(([regionName, regionBox]) => {
-              if (!Array.isArray(regionBox) || regionBox.length !== 4) {
-                return null;
-              }
-
-              const [x, y, w, h] = regionBox;
-              const left = `${Math.max(0, x) * 100}%`;
-              const top = `${Math.max(0, y) * 100}%`;
-              const width = `${Math.max(0.02, w) * 100}%`;
-              const height = `${Math.max(0.02, h) * 100}%`;
-              const strength = Number(vitals.region_signal_strength?.[regionName] || 0).toFixed(3);
-              const label = regionName.replace('_', ' ');
-
-              return (
-                <Box
-                  key={regionName}
-                  className={`roi-region-box roi-region-${regionName}`}
-                  sx={{ left, top, width, height }}
-                >
-                  <Typography className="roi-region-label">
-                    {label}
-                    {' '}
-                    {strength}
-                  </Typography>
-                </Box>
-              );
-            })}
           </Box>
 
           <Box className="wave-overlay-panel">
@@ -502,7 +460,6 @@ const RealtimeVitalsMonitor = () => {
 
         {error && <Alert severity="error" sx={{ mt: 1.4 }}>{error}</Alert>}
         {!!faceAlert && !error && <Alert severity="warning" sx={{ mt: 1.4 }}>{faceAlert}</Alert>}
-        {!!fitAlert && !error && <Alert severity="warning" sx={{ mt: 1.4 }}>{fitAlert}</Alert>}
         {!!vitals.warning && <Alert severity="warning" sx={{ mt: 1.4 }}>{vitals.warning}</Alert>}
       </Card>
     </Box>
