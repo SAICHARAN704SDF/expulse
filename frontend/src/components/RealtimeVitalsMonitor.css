@@ -116,6 +116,38 @@
   text-transform: uppercase;
 }
 
+.distance-tip {
+  position: absolute;
+  z-index: 5;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 28px), 300px);
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(116, 201, 255, 0.55);
+  background: rgba(8, 31, 49, 0.8);
+  box-shadow: 0 0 14px rgba(67, 185, 255, 0.18);
+  text-align: center;
+}
+
+.distance-tip-title {
+  font-size: 0.75rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: #e4f5ff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.distance-tip-subtitle {
+  margin-top: 3px;
+  font-size: 0.64rem;
+  line-height: 1.25;
+  color: #b6d8f1;
+  letter-spacing: 0.03em;
+}
+
 .inline-fit-warning {
   position: absolute;
   z-index: 5;

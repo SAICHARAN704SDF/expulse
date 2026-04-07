@@ -100,20 +100,6 @@ const RealtimeVitalsMonitor = () => {
   }, [vitals]);
 
   useEffect(() => {
-    if (!cameraReady || scanState !== 'idle') {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      startScan();
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [cameraReady, scanState]);
-
-  useEffect(() => {
     if (scanState !== 'scanning' || !scanStartedAt) {
       return undefined;
     }
@@ -273,6 +259,11 @@ const RealtimeVitalsMonitor = () => {
       return;
     }
 
+    if (!cameraReady) {
+      setError('Camera is still starting. Hold the phone 15-20 cm from your face and try again.');
+      return;
+    }
+
     setError('');
     setVitals(initialVitals);
     frameBufferRef.current = [];
@@ -348,6 +339,7 @@ const RealtimeVitalsMonitor = () => {
 
   const scanSeconds = Math.floor(elapsedMs / 1000);
   const hasLiveReadings = (vitals.bpm || 0) > 0 && (vitals.respiratory_rate || 0) > 0;
+  const distanceTipVisible = cameraReady && scanState !== 'scanning';
 
   return (
     <Box className="monitor-shell">
@@ -370,6 +362,13 @@ const RealtimeVitalsMonitor = () => {
           {scanState === 'scanning' && vitals.face_detected === false && (
             <Box className="inline-no-face-warning">
               <Typography className="inline-no-face-warning-text">No face detected</Typography>
+            </Box>
+          )}
+
+          {distanceTipVisible && (
+            <Box className="distance-tip">
+              <Typography className="distance-tip-title">Hold phone 15-20 cm from your face</Typography>
+              <Typography className="distance-tip-subtitle">Then tap Scan to start reading health data.</Typography>
             </Box>
           )}
 

@@ -5,10 +5,6 @@ export const getDefaultApiBaseUrl = () => {
     return process.env.REACT_APP_API_URL;
   }
 
-  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost') {
-    return `http://${window.location.hostname}:8000/api`;
-  }
-
   return 'https://dollar-rack-catering-male.trycloudflare.com/api';
 };
 

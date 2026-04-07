@@ -55,6 +55,7 @@ const Signup = () => {
     } catch (err) {
       const isNetworkError = err.message === 'Network Error';
       if (isNetworkError) {
+        setError('Cannot reach the backend right now. Check your connection and try again.');
         return;
       }
 
