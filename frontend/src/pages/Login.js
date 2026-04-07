@@ -16,15 +16,40 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  API_URL_STORAGE_KEY,
+  getApiBaseUrl,
+  normalizeApiBaseUrl,
+} from '../services/api';
 
 const Login = () => {
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [backendUrl, setBackendUrl] = useState(getApiBaseUrl());
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleBackendUrlChange = () => {
+    const currentBase = backendUrl.replace(/\/api$/, '');
+    const enteredBase = window.prompt('Enter backend base URL', currentBase);
+
+    if (enteredBase === null) {
+      return;
+    }
+
+    const normalized = normalizeApiBaseUrl(enteredBase);
+    if (!normalized) {
+      setError('Invalid backend URL. Example: https://your-backend.com');
+      return;
+    }
+
+    localStorage.setItem(API_URL_STORAGE_KEY, normalized);
+    setBackendUrl(normalized);
+    setError(`Backend URL updated to ${normalized}. Try login again.`);
+  };
 
   const useDemoLogin = () => {
     setIdentity('demo');
@@ -49,12 +74,13 @@ const Login = () => {
       await login(normalizedIdentity, normalizedPassword);
       navigate('/profile');
     } catch (err) {
+      const isNetworkError = err.message === 'Network Error';
       setError(
         err.response?.data?.detail
-          || (err.message === 'Network Error'
-            ? 'Backend server is not running on port 8000. Start FastAPI and try again.'
+          || (isNetworkError
+            ? `Cannot reach backend at ${backendUrl}.`
             : err.message)
-          || 'Unable to login. Please make sure the backend server is running and try again.',
+          || 'Unable to login. Please verify backend URL and try again.',
       );
     } finally {
       setSubmitting(false);
@@ -114,7 +140,23 @@ const Login = () => {
                 Quick login: username <strong>demo</strong> and password <strong>demo123</strong>
               </Alert>
 
-              {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+              {error && (
+                <Alert
+                  severity="error"
+                  sx={{ mb: 2, '& .MuiAlert-message': { width: '100%' } }}
+                  action={(
+                    <Button color="inherit" size="small" onClick={handleBackendUrlChange}>
+                      Change URL
+                    </Button>
+                  )}
+                >
+                  {error}
+                </Alert>
+              )}
+
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
+                Backend: {backendUrl}
+              </Typography>
 
               <Box component="form" onSubmit={handleSubmit}>
                 <TextField
