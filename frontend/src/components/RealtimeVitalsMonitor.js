@@ -364,20 +364,6 @@ const RealtimeVitalsMonitor = () => {
 
       <Card className="monitor-card">
         <Box className="camera-stage">
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            mirrored
-            screenshotFormat="image/jpeg"
-            screenshotQuality={0.78}
-            videoConstraints={webcamConstraints}
-            onUserMedia={() => setCameraReady(true)}
-            onUserMediaError={() => setError('Camera permission denied or unavailable.')}
-            className="scan-camera-video"
-          />
-
-          <Box className="scan-overlay-frost" />
-
           <Box className="top-status-row">
             <Chip size="small" label={`FPS ${fps}`} className="monitor-chip" />
             <Chip
@@ -400,6 +386,54 @@ const RealtimeVitalsMonitor = () => {
               <Typography className="inline-fit-warning-text">Align Face In Blue Frame</Typography>
             </Box>
           )}
+
+          <Box className="face-frame-layer">
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              mirrored
+              screenshotFormat="image/jpeg"
+              screenshotQuality={0.78}
+              videoConstraints={webcamConstraints}
+              onUserMedia={() => setCameraReady(true)}
+              onUserMediaError={() => setError('Camera permission denied or unavailable.')}
+              className="scan-camera-video"
+            />
+
+            <Box className="scan-overlay-frost" />
+
+            <Box className={`scan-oval ${scanState === 'scanning' ? 'scan-oval-active' : ''}`}>
+              {scanState === 'scanning' && !hasLiveReadings && <Box className="scan-sweep-line" />}
+            </Box>
+
+            {roiEntries.map(([regionName, regionBox]) => {
+              if (!Array.isArray(regionBox) || regionBox.length !== 4) {
+                return null;
+              }
+
+              const [x, y, w, h] = regionBox;
+              const left = `${Math.max(0, x) * 100}%`;
+              const top = `${Math.max(0, y) * 100}%`;
+              const width = `${Math.max(0.02, w) * 100}%`;
+              const height = `${Math.max(0.02, h) * 100}%`;
+              const strength = Number(vitals.region_signal_strength?.[regionName] || 0).toFixed(3);
+              const label = regionName.replace('_', ' ');
+
+              return (
+                <Box
+                  key={regionName}
+                  className={`roi-region-box roi-region-${regionName}`}
+                  sx={{ left, top, width, height }}
+                >
+                  <Typography className="roi-region-label">
+                    {label}
+                    {' '}
+                    {strength}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
 
           <Box className="wave-overlay-panel">
             <Box className="wave-overlay-row">
@@ -440,39 +474,6 @@ const RealtimeVitalsMonitor = () => {
               </Box>
             </Box>
           </Box>
-
-
-          <Box className={`scan-oval ${scanState === 'scanning' ? 'scan-oval-active' : ''}`}>
-            {scanState === 'scanning' && !hasLiveReadings && <Box className="scan-sweep-line" />}
-          </Box>
-
-          {roiEntries.map(([regionName, regionBox]) => {
-            if (!Array.isArray(regionBox) || regionBox.length !== 4) {
-              return null;
-            }
-
-            const [x, y, w, h] = regionBox;
-            const left = `${Math.max(0, x) * 100}%`;
-            const top = `${Math.max(0, y) * 100}%`;
-            const width = `${Math.max(0.02, w) * 100}%`;
-            const height = `${Math.max(0.02, h) * 100}%`;
-            const strength = Number(vitals.region_signal_strength?.[regionName] || 0).toFixed(3);
-            const label = regionName.replace('_', ' ');
-
-            return (
-              <Box
-                key={regionName}
-                className={`roi-region-box roi-region-${regionName}`}
-                sx={{ left, top, width, height }}
-              >
-                <Typography className="roi-region-label">
-                  {label}
-                  {' '}
-                  {strength}
-                </Typography>
-              </Box>
-            );
-          })}
 
           <IconButton className="floating-control floating-control-left" onClick={scanState === 'scanning' ? () => stopScan(true) : startScan}>
             {scanState === 'scanning' ? <PauseCircleOutlineRoundedIcon /> : <PlayCircleOutlineRoundedIcon />}
