@@ -1,25 +1,25 @@
 import axios from 'axios';
 
-export const API_URL_STORAGE_KEY = 'expluse_api_url';
-
-export const normalizeApiBaseUrl = (value) => {
-  const trimmedValue = (value || '').trim().replace(/\/+$/, '');
-
-  if (!trimmedValue) {
-    return '';
+export const getDefaultApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
   }
 
-  return trimmedValue.endsWith('/api') ? trimmedValue : `${trimmedValue}/api`;
+  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost') {
+    return `http://${window.location.hostname}:8000/api`;
+  }
+
+  return 'http://127.0.0.1:8000/api';
 };
 
-export const getApiBaseUrl = () => {
-  const savedUrl = normalizeApiBaseUrl(localStorage.getItem(API_URL_STORAGE_KEY));
-  const envUrl = normalizeApiBaseUrl(process.env.REACT_APP_API_URL);
+export const API_BASE_URL = getDefaultApiBaseUrl();
 
-  return savedUrl || envUrl || 'http://127.0.0.1:8000/api';
+export const getApiBaseUrl = () => {
+  return API_BASE_URL;
 };
 
 const api = axios.create({
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,8 +28,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    config.baseURL = getApiBaseUrl();
-
     const token = localStorage.getItem('token');
 
     if (token) {
