@@ -9,7 +9,7 @@ export const getDefaultApiBaseUrl = () => {
     return `http://${window.location.hostname}:8000/api`;
   }
 
-  return 'http://127.0.0.1:8000/api';
+  return 'https://dollar-rack-catering-male.trycloudflare.com/api';
 };
 
 export const API_BASE_URL = getDefaultApiBaseUrl();
