@@ -5,7 +5,7 @@ export const getDefaultApiBaseUrl = () => {
     return process.env.REACT_APP_API_URL;
   }
 
-  return 'https://dollar-rack-catering-male.trycloudflare.com/api';
+  return 'https://using-occasionally-cleanup-targeted.trycloudflare.com/api';
 };
 
 export const API_BASE_URL = getDefaultApiBaseUrl();
